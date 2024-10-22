@@ -39,7 +39,7 @@ profileImg:{
     type:String,
     default:""
 },
-converImg:{
+coverImg:{
     type:String,
     default:""
 },
@@ -50,7 +50,15 @@ bio:{
 link:{
     type:String,
     default:""
-}
+},
+likedPosts:[
+    {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Post",
+        default:[]
+
+    }
+]
 
 },{timestamp:true})
 
