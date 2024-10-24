@@ -7,6 +7,7 @@ import { authRoutes } from "./routes/authRoutes.js"
 import { userRouter } from "./routes/user.routes.js"
 import {v2 as cloudinary} from "cloudinary"
 import { postRouter } from "./routes/postRoutes.js"
+import { notificationRoutes } from "./routes/notification.Routes.js"
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended:true})) // to parse form data
@@ -23,6 +24,7 @@ cloudinary.config({
 app.use("/api/auth",authRoutes)
 app.use("/api/users",userRouter)
 app.use("/api/posts",postRouter)
+app.use("/api/notification",notificationRoutes)
 
 const usePort = process.env.PORT || 2001
 

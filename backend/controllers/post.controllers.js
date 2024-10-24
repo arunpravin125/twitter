@@ -144,7 +144,7 @@ export const getAllPosts = async (req, res) => {
         path: "user",
         select: "-password",
       })
-      .populate({ path: "comments.user", select: "-password email" });
+      .populate({ path: "comments.user", select: "-password" });
 
     if (posts.length == 0) {
       return res.status(200).json([]);
