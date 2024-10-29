@@ -1,3 +1,4 @@
+import path from "path"
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
@@ -27,6 +28,16 @@ app.use("/api/posts",postRouter)
 app.use("/api/notification",notificationRoutes)
 
 const usePort = process.env.PORT || 2001
+
+const __dirname = path.resolve()
+
+if(process.env.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname, "/frontend/dist")))
+
+    app.get("*",(req,res)=>{
+        res.sendFile(path.resolve(__dirname,"frontend","dist","index.html"))
+    })
+}
 
 app.listen(usePort,()=>{
     connection()

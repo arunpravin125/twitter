@@ -4,9 +4,11 @@
   "main": "backend/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"nodemon backend/index.js"
+    "start": "cross-env NODE_ENV=production node backend/index.js",
+    "dev":" cross-env NODE_ENV=development nodemon backend/index.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
-  "type":"module",
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,5 +23,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.2",
     "nodemon": "^3.1.7"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
