@@ -17,15 +17,22 @@ export const useFollow = ()=>{
                 })
                 const data = await res.json()
                 if(!res.ok) throw new Error(data.error || "something went wrong")
+                    console.log("following or unfollow",data)
                 return data
             } catch (error) {
                 console.log("error in followAndUnfollowin",error)
                 toast.error(error.message)
             }
         },
-        onSuccess:()=>{
-          Promise.all([ queryClient.invalidateQueries({queryKey:["suggestedUser"]}),
-           queryClient.invalidateQueries({queryKey:["authUser"]})])
+        onSuccess:(follow)=>{
+        queryClient.invalidateQueries({queryKey:["authUser"]}),
+
+          queryClient.invalidateQueries({queryKey:["suggestedUser"]})
+           
+          queryClient.setQueryData(["authUser"],(oldData)=>{
+            console.log("authOldData",oldData)
+           return oldData?{...oldData,following:follow}:oldData
+          })
         },
         onError:()=>{
             toast.error(error.message)

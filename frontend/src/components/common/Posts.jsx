@@ -4,15 +4,22 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType }) => {
+const Posts = ({ feedType,username,userId }) => {
+
   const getPostEndpoint = () => {
     switch (feedType) {
       case "forYou":
         return "/api/posts/getposts";
 
       case "following":
-        return "api/posts/following";
-
+        return "/api/posts/following";
+      
+      case "posts":
+        return `/api/posts/user/${username}`
+     
+      case "likes":
+          return `/api/posts/getlike/${userId}`  
+      
       default:
         return "/api/posts/getposts";
     }
@@ -20,12 +27,12 @@ const Posts = ({ feedType }) => {
   const POST_ENDPOINT = getPostEndpoint();
 
   const {
-    data: posts,
+    data:posts,
     isLoading,
     refetch,
     isRefetching,
   } = useQuery({
-    querykey: ["posts"],
+    queryKey:["posts"],
     queryFn: async () => {
       try {
         const res = await fetch(POST_ENDPOINT);
@@ -34,6 +41,9 @@ const Posts = ({ feedType }) => {
         if (!res.ok) {
           throw new Error(data.error);
         }
+        
+				console.log("post",data)
+        
         return data;
       } catch (error) {
         console.log("error in getPosts", error);
@@ -61,7 +71,7 @@ const Posts = ({ feedType }) => {
       {!isLoading && !isRefetching && posts && (
         <div>
           {posts.map((post) => (
-            <Post key={post._id} post={post} />
+            <Post key={post._id}  post={post} />
           ))}
         </div>
       )}

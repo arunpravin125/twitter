@@ -5,8 +5,8 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const createPost = async (req, res) => {
   try {
-    const { text } = req.body;
-    let { img } = req.body;
+    let { text, img } = req.body;
+
     const userId = req.user._id.toString();
 
     const user = await User.findById(userId);
@@ -21,12 +21,12 @@ export const createPost = async (req, res) => {
 
     if (img) {
       const uploadedResponse = await cloudinary.uploader.upload(img);
-      img = uploadedResponse.secure_url;
+      var image = uploadedResponse.secure_url;
     }
     const newPost = new Post({
       user: userId,
       text,
-      img,
+      img: image,
     });
     await newPost.save();
 
@@ -66,12 +66,12 @@ export const deletePost = async (req, res) => {
 
 export const likeUnlikePost = async (req, res) => {
   try {
-    const { id: postId } = req.params;
+    const { id:postId } = req.params;
 
     const currentUserId = req.user._id;
 
     const user = await User.findById(currentUserId).select("-password");
-    const post = await Post.findById(postId);
+    let post = await Post.findById(postId);
     if (!user) {
       return res.status(400).json({ error: "User not found " });
     }
@@ -80,27 +80,35 @@ export const likeUnlikePost = async (req, res) => {
     }
 
     const isliked = post.likes.includes(user._id);
-
+  let updatedLikes;
     if (!isliked) {
-      await Post.findByIdAndUpdate(postId, { $push: { likes: user._id } });
+      await Post.findByIdAndUpdate(postId,{$push:{likes:user._id}});
+      await post.save();
       await User.updateOne(
         { _id: user._id },
         { $push: { likedPosts: postId } }
       );
-      const notification = new Notification({
-        type: "like",
-        from: currentUserId,
-        to: post.user,
-      });
-      await notification.save();
-      res.status(200).json({ message: "post liked" });
-    } else {
-      await Post.findByIdAndUpdate(postId, { $pull: { likes: user._id } });
-      await User.updateOne(
-        { _id: user._id },
-        { $pull: { likedPosts: postId } }
-      );
-      res.status(200).json({ message: "post Unliked" });
+       const notification = new Notification({
+          type: "like",
+          from: currentUserId,
+          to: post.user,
+        });
+        await notification.save();
+    
+      updatedLikes = post.likes
+      res.status(200).json(updatedLikes);
+    }
+    // } else {
+    //   // await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
+    //   // await post.save()
+  
+    //   // res.status(200).json(post.likes);
+    // }
+    if(isliked){
+      await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
+      await post.save()
+  
+      res.status(200).json(post.likes);
     }
   } catch (error) {
     console.log("error in likeUnlikePost", error);
@@ -113,7 +121,10 @@ export const commentPost = async (req, res) => {
   const currentUserId = req.user._id;
   const { text } = req.body;
   try {
-    let post = await Post.findById(postId);
+    let post = await Post.findById(postId).populate({
+      path: "comments.user",
+      select: "-password",
+    });
     const user = await User.findById(currentUserId);
     if (!text) {
       return res.status(400).json({ error: "text feild is required" });
@@ -124,12 +135,20 @@ export const commentPost = async (req, res) => {
     if (!user) {
       return res.status(400).json({ error: "user not found" });
     }
-    const comment = { user: user._id, text };
+    const comment = {
+      user: {
+        _id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+      },
+      text,
+    };
 
     post.comments.push(comment);
 
     await post.save();
-    res.status(200).json(post);
+    // const lastPost = post.comments.pop()
+    res.status(200).json(post.comments);
   } catch (error) {
     console.log("error in commentPost", error);
     res.status(400).json({ error: error.message });
@@ -144,7 +163,7 @@ export const getAllPosts = async (req, res) => {
         path: "user",
         select: "-password",
       })
-      .populate({ path: "comments.user", select: "-password" });
+      .populate({ path: "comments.user", select: "-password" }).sort({createdAt:-1});
 
     if (posts.length == 0) {
       return res.status(200).json([]);
@@ -158,9 +177,11 @@ export const getAllPosts = async (req, res) => {
 
 export const getLikePost = async (req, res) => {
   try {
-    
-    const user = await User.findById(req.user._id);
-    const likedPost = await Post.find({ _id: { $in: user.likedPosts } }).populate({path:"user",select:"-password"}).populate({path:"comments.user",select:"-password"})
+    const {id} = req.params
+    const user = await User.findById(id);
+    const likedPost = await Post.find({ _id: { $in: user.likedPosts } })
+      .populate({ path: "user", select: "-password" })
+      .populate({ path: "comments.user", select: "-password" });
     if (!user) {
       return res.status(400).json({ error: "user not found" });
     }
@@ -171,46 +192,48 @@ export const getLikePost = async (req, res) => {
   }
 };
 
-
-export const followingPost = async(req,res)=>{
-    try {
-        const userId = req.user._id
-        const user = await User.findById(userId)
-         if(!user){
-            return res.status(400).json({error:"User not found"})
-         }
-        const following = user.following
-
-        const feedPosts = await Post.find({user:{$in:following}}).sort({createdAt:-1}).populate({path:"user",select:"-password"}).populate({path:"comments.user",select:"-password"})
-
-        res.status(200).json(feedPosts)
-    } catch (error) {
-        console.log("error in getFollowingPost", error);
-        res.status(400).json({ error: error.message });
+export const followingPost = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
     }
-}
+    const following = user.following;
 
-export const getUserPosts = async(req,res)=>{
-    try {
-        const {username} = req.params
+    const feedPosts = await Post.find({ user: { $in: following } })
+      .sort({ createdAt: -1 })
+      .populate({ path: "user", select: "-password" })
+      .populate({ path: "comments.user", select: "-password" });
 
-        const user = await User.findOne({username})
+    res.status(200).json(feedPosts);
+  } catch (error) {
+    console.log("error in getFollowingPost", error);
+    res.status(400).json({ error: error.message });
+  }
+};
 
-        if(!user){
-            return res.status(400).json({error:"User not found"})
-        }
+export const getUserPosts = async (req, res) => {
+  try {
+    const { username } = req.params;
 
-        const posts = await Post.find({user:user._id}).sort({createAt:-1}).populate({
-            path:"user",
-            select:"-password"
-        }).populate({path:"comments.user",
-            select:"-password"
-        })
+    const user = await User.findOne({ username });
 
-        res.status(200).json(posts)
-        
-    } catch (error) {
-        console.log("error in getUserPost", error);
-        res.status(400).json({ error: error.message });
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
     }
-}
+
+    const posts = await Post.find({ user: user._id })
+      .sort({ createAt: -1 })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({ path: "comments.user", select: "-password" });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("error in getUserPost", error);
+    res.status(400).json({ error: error.message });
+  }
+};

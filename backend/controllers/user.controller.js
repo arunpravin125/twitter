@@ -64,13 +64,9 @@ export const followUnfollowUser = async (req, res) => {
     const isFollowing = currentUser.following.includes(modifyUser._id);
 
     if (!isFollowing) {
-      await User.findByIdAndUpdate(modifyUser._id, {
-        $push: { followers: req.user._id },
-      });
-      await User.findByIdAndUpdate(currentUser._id, {
-        $push: { following: modifyUser._id },
-      });
-      res.status(200).json({ message: `following` });
+      await User.findByIdAndUpdate(modifyUser._id,{$push:{followers:req.user._id }});
+      await User.findByIdAndUpdate(currentUser._id,{$push:{following: modifyUser._id }});
+      res.status(200).json(currentUser.following);
       const newNotification = new Notification({
         type: "follow",
         from: currentId,
@@ -78,13 +74,11 @@ export const followUnfollowUser = async (req, res) => {
       });
       await newNotification.save();
     } else {
-      await User.findByIdAndUpdate(modifyUser._id, {
-        $pull: { followers: req.user._id },
-      });
-      await User.findByIdAndUpdate(currentUser._id, {
-        $pull: { followers: modifyUser._id },
-      });
-      res.status(200).json({ message: `unfollowing` });
+
+      await User.findByIdAndUpdate(modifyUser._id,{$pull: { followers: req.user._id }});
+      await User.findByIdAndUpdate(currentUser._id,{$pull: { following: modifyUser._id }});
+      
+      res.status(200).json(currentUser.following);
     }
   } catch (error) {
     console.log("erorr in followUnfollowUser", error);
@@ -132,14 +126,14 @@ export const updateUser = async (req, res) => {
         if(user.profileImg){
             await cloudinary.uploader.destroy(user.profileImg.split("/").pop().split(".")[0])
         }
-        const uploadedResponse =   await cloudinary.uploader(profileImg)
+        const uploadedResponse =   await cloudinary.uploader.upload(profileImg)
         profileImg = uploadedResponse.secure_url
     }
     if(coverImg){
         if(user.coverImg){
             await cloudinary.uploader.destroy(user.coverImg.split("/").pop().split(".")[0])
         }
-        const uploadedResponse =   await cloudinary.uploader(coverImg)
+        const uploadedResponse =   await cloudinary.uploader.upload(coverImg)
         coverImg = uploadedResponse.secure_url
     }
 
@@ -148,8 +142,8 @@ export const updateUser = async (req, res) => {
       user.bio = bio || user.bio,
     user.link =link || user.link,
     user.password = hashPassword || user.password,
-    user.profileImg=profileImg || user.profileImg,
-    user.coverImg = coverImg || user.converImg,
+    user.profileImg = profileImg || user.profileImg,
+    user.coverImg = coverImg || user.coverImg,
 
     user = await user.save();
       user.password = null

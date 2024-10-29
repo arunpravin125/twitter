@@ -14,10 +14,15 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 function App() {
 
   const {data:authUser,isLoading}=useQuery({
-    queryKey:['authUser'],
+    queryKey:["authUser"],
     queryFn:async()=>{
       try {
-        const res = await fetch("api/auth/me")
+        const res = await fetch("api/auth/me",{
+          method:"GET",
+          headers:{
+            "Content-Type":"application/json"
+          }
+        })
         const data = await res.json()
         if(data.error){
           return null
@@ -28,8 +33,8 @@ function App() {
         console.log("authUser",data)
         return data
       } catch (error) {
-        console.log("erorr in authUser")
-        throw new Error(error)
+        console.log("erorr in authUser",error.message)
+        throw error
         
       }
     },

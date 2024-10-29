@@ -60,7 +60,7 @@ likedPosts:[
     }
 ]
 
-},{timestamp:true})
+}, { timestamps: true })
 
 const User = mongoose.model("User",userSchema)
 
