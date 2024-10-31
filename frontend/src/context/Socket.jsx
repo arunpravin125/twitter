@@ -16,7 +16,7 @@ export const SocketContextProvider = ({children})=>{
     const [onlineUser,setOnlineUser] = useState([])
 
     useEffect(()=>{
-        const socket = io("https://twitterapp-jtqc.onrender.com",{
+        const socket = io("http://localhost:2000",{
             query:{
                 userId:auth?._id
             }
