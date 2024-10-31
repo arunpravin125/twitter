@@ -37,7 +37,7 @@ const MessageL = ({ownMessage,message,messageText,loading}) => {
     <time className="text-xs opacity-50">12:45</time>
   </div>
   <div className="chat-bubble flex flex-wrap w-auto">{message.text}</div>
-  <div className="chat-footer opacity-50 text-slate-50 ">Delivered</div>
+  {ownMessage?<div className="chat-footer opacity-50 text-slate-50 ">{message.seen?"seen":"delivered"}</div>:""}
 </div>
 
     </div>

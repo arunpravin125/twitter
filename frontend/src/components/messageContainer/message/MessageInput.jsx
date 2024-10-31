@@ -26,6 +26,19 @@ const MessageInput = ({}) => {
       }
      
       setMessages((prevMessage)=>[...prevMessage,data])
+      setConversations((prev)=>{
+        const updateConversation = prev.map(conversation=>{
+          if(selectedConversation.conversationId==conversation._id){
+            return{
+              ...conversation,lastMessage:{
+                ...conversation.lastMessage,text:data.text,sender:data.sender
+              }
+            }
+          }
+          return conversation
+        })
+        return updateConversation
+      })
       setText("")
     } catch (error) {
       console.log("error in messageSend",error)

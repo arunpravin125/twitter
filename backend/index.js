@@ -10,7 +10,8 @@ import {v2 as cloudinary} from "cloudinary"
 import { postRouter } from "./routes/postRoutes.js"
 import { notificationRoutes } from "./routes/notification.Routes.js"
 import { messageRoutes } from "./routes/messageRoutes.js"
-const app = express()
+import { app,server } from "./socket/socket.js"
+
 app.use(express.json({limit:"5mb"}))
 app.use(express.urlencoded({extended:true})) // to parse form data
 app.use(cookieParser())
@@ -41,7 +42,7 @@ if(process.env.NODE_ENV === "production"){
     })
 }
 
-app.listen(usePort,()=>{
+server.listen(usePort,()=>{
     connection()
     console.log("Server started...",usePort)
 })

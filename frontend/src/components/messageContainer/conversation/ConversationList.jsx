@@ -2,10 +2,11 @@ import React, { useEffect } from 'react'
 import Conversation from './Conversation'
 import { useMessageContext } from '../../../hooks/useMessage'
 import {toast} from "react-hot-toast"
+import { useSocketContext } from '../../../context/Socket'
 const ConversationList = () => {
 
-  const {conversations,setConversations} = useMessageContext()
-
+  const {conversations,setConversations,messages,selectedConversation,setSelectedConversation} = useMessageContext()
+  const {socket} = useSocketContext()
   useEffect(()=>{
  
     const getConversation =async()=>{
@@ -27,6 +28,36 @@ const ConversationList = () => {
     }
 getConversation()
   },[])
+
+  useEffect(()=>{
+    socket?.on("newMessage",(message)=>{
+    console.log("message",message)
+      if(selectedConversation.conversationId == message.conversationId){
+        
+        setConversations(prev=>{
+          const updateConversation = prev.map(conversation=>{
+            if(selectedConversation.conversationId==conversation._id){
+              return{
+                ...conversation,lastMessage:{
+                  ...conversation.lastMessage,text:message.text,sender:message.sender
+                }
+              }
+            }
+            return conversation
+          })
+          return updateConversation
+        })
+  
+      }
+      
+    })
+  
+   return ()=> socket?.off("newMessage")
+  
+  },[messages])
+
+
+
   return (
     <div className="h-96 w-44 ml-2  overflow-auto  " >
       
