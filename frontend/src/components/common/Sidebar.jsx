@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { IoChatbox } from "react-icons/io5";
 
 const Sidebar = () => {
 	// const data = {
@@ -88,6 +89,15 @@ const {data:authUser,error} = useQuery({queryKey:["authUser"]})
 						>
 							<FaUser className='w-6 h-6' />
 							<span className='text-lg hidden md:block'>Profile</span>
+						</Link>
+					</li>
+					<li className='flex justify-center md:justify-start'>
+						<Link
+							to='/message'
+							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+						>
+							<IoChatbox  className='w-8 h-8' />
+							<span className='text-lg hidden md:block'>Chat</span>
 						</Link>
 					</li>
 				</ul>

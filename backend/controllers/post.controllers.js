@@ -80,10 +80,10 @@ export const likeUnlikePost = async (req, res) => {
     }
 
     const isliked = post.likes.includes(user._id);
-  let updatedLikes;
+
     if (!isliked) {
-      await Post.findByIdAndUpdate(postId,{$push:{likes:user._id}});
-      await post.save();
+     const like = await Post.findByIdAndUpdate(postId,{$push:{likes:user._id}});
+      await like.save();
       await User.updateOne(
         { _id: user._id },
         { $push: { likedPosts: postId } }
@@ -95,26 +95,26 @@ export const likeUnlikePost = async (req, res) => {
         });
         await notification.save();
     
-      updatedLikes = post.likes
-      res.status(200).json(updatedLikes);
+      
+      res.status(200).json(like.likes);
     }
-    // } else {
-    //   // await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
-    //   // await post.save()
+     else {
+     const unlike = await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
+      await unlike.save()
   
-    //   // res.status(200).json(post.likes);
-    // }
-    if(isliked){
-      await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
-      await post.save()
-  
-      res.status(200).json(post.likes);
+      res.status(200).json(unlike.likes);
     }
+    // if(isliked){
+    //   await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
+    //   await post.save()
+  
+    //   res.status(200).json(post.likes);
+    
   } catch (error) {
     console.log("error in likeUnlikePost", error);
     res.status(400).json({ error: error.message });
   }
-};
+}
 
 export const commentPost = async (req, res) => {
   const { id: postId } = req.params;

@@ -9,10 +9,12 @@ import NotificationPage from "./pages/notification/NotificationPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
+import ChatUi from "./components/messageContainer/ChatUi";
+import { useMessageContext } from "./hooks/useMessage";
 
 
 function App() {
-
+        const {setAuth}=useMessageContext()
   const {data:authUser,isLoading}=useQuery({
     queryKey:["authUser"],
     queryFn:async()=>{
@@ -31,6 +33,7 @@ function App() {
           throw new Error(data.error || "Something went wrong")
         }
         console.log("authUser",data)
+        setAuth(data)
         return data
       } catch (error) {
         console.log("erorr in authUser",error.message)
@@ -60,6 +63,7 @@ function App() {
           <Route path="/signup" element={authUser?<Navigate to="/" />:<SignupPage />}></Route>
           <Route path="/notifications" element={authUser?<NotificationPage />:<Navigate to="/login" />}></Route>
           <Route path="/profile/:username" element={authUser?<ProfilePage/>:<Navigate to="/login" />}></Route>
+          <Route path="/message" element={authUser?<ChatUi/>:<Navigate to="/login" />}></Route>
         </Routes>
       {authUser &&  <RightPanel/>}
       </div>

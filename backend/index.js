@@ -9,6 +9,7 @@ import { userRouter } from "./routes/user.routes.js"
 import {v2 as cloudinary} from "cloudinary"
 import { postRouter } from "./routes/postRoutes.js"
 import { notificationRoutes } from "./routes/notification.Routes.js"
+import { messageRoutes } from "./routes/messageRoutes.js"
 const app = express()
 app.use(express.json({limit:"5mb"}))
 app.use(express.urlencoded({extended:true})) // to parse form data
@@ -26,6 +27,7 @@ app.use("/api/auth",authRoutes)
 app.use("/api/users",userRouter)
 app.use("/api/posts",postRouter)
 app.use("/api/notification",notificationRoutes)
+app.use("/api/message",messageRoutes)
 
 const usePort = process.env.PORT || 2001
 
