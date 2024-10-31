@@ -32,7 +32,7 @@ getConversation()
   useEffect(()=>{
     socket?.on("newMessage",(message)=>{
     console.log("message",message)
-      if(selectedConversation.conversationId == message.conversationId){
+      if(selectedConversation?.conversationId == message.conversationId){
         
         setConversations(prev=>{
           const updateConversation = prev.map(conversation=>{
