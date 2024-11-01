@@ -17,7 +17,7 @@ export const SocketContextProvider = ({children})=>{
 
     useEffect(()=>{
         
-        const socket = io("https://twitterapp-h9aq.onrender.com",{
+        const socket = io("https://twitter-3-bxjt.onrender.com",{
             query:{
                 userId:auth?._id
             }
