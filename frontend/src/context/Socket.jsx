@@ -16,8 +16,8 @@ export const SocketContextProvider = ({children})=>{
     const [onlineUser,setOnlineUser] = useState([])
 
     useEffect(()=>{
-        if(auth){
-        const socket = io("https://twitter-h517.onrender.com/",{
+        
+        const socket = io("http://localhost:2000",{
             query:{
                 userId:auth?._id
             }
@@ -26,14 +26,10 @@ export const SocketContextProvider = ({children})=>{
             setOnlineUser(users)
         })
         setSocket(socket)
-        return ()=>socket.close()
-    }else{
-        if(socket){
-            socket.close()
-            setSocket(null)
-        }
-    }
-    },[auth])
+        return ()=>socket.close() && setSocket(null)
+    
+        
+    },[auth?._id])
     
     return (<SocketContext.Provider value={{socket,setSocket,onlineUser,setOnlineUser,}}>
         {children}
