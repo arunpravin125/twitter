@@ -17,7 +17,7 @@ export const SocketContextProvider = ({children})=>{
 
     useEffect(()=>{
         if(auth){
-        const socket = io("http://localhost:2000",{
+        const socket = io("https://twitter-h517.onrender.com/",{
             query:{
                 userId:auth?._id
             }
