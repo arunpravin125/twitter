@@ -123,7 +123,7 @@ useEffect(()=>{
 },[messages,setMessages])
 
   return (
-    <div className="bg-slate-400 p-1 h-96 mt-2 overflow-auto " >
+    <div className="bg-purple-100 p-1 h-96 mt-2 overflow-auto " >
     
       {messages.length == 0?<>
       <div className="flex justify-center items-center" >

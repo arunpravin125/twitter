@@ -1,5 +1,6 @@
 import React from 'react'
 import { useMessageContext } from '../../../hooks/useMessage'
+import { extractTime } from '../../../utils/extractTime'
 
 const MessageL = ({ownMessage,message,messageText,loading}) => {
   const {conversations,setConversations,auth,selectedConversation,setSelectedConversation,messages,setMessages} = useMessageContext()
@@ -34,10 +35,10 @@ const MessageL = ({ownMessage,message,messageText,loading}) => {
   </div>
   <div className="chat-header">
    
-    <time className="text-xs opacity-50">12:45</time>
+    <time className="text-md text-black opacity-50">{extractTime(message.createdAt)}</time>
   </div>
   <div className="chat-bubble flex flex-wrap w-auto">{message.text}</div>
-  {ownMessage?<div className="chat-footer opacity-50 text-slate-50 ">{message.seen?"seen":"delivered"}</div>:""}
+  {ownMessage?<div className="chat-footer opacity-50 text-black  text-md ">{message.seen?"seen":"delivered"}</div>:""}
 </div>
 
     </div>
