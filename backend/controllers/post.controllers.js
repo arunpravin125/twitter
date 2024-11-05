@@ -82,8 +82,9 @@ export const likeUnlikePost = async (req, res) => {
     const isliked = post.likes.includes(user._id);
 
     if (!isliked) {
-     const like = await Post.findByIdAndUpdate(postId,{$push:{likes:user._id}});
-      await like.save();
+      // await Post.updateOne({_id:postId},{$pull:{likes:userId}})
+    await Post.updateOne({_id:postId},{$push:{likes:user._id}});
+     
       await User.updateOne(
         { _id: user._id },
         { $push: { likedPosts: postId } }
@@ -95,14 +96,15 @@ export const likeUnlikePost = async (req, res) => {
         });
         await notification.save();
     
-      
-      res.status(200).json(like.likes);
+         post = await Post.findById(postId);
+      res.status(200).json(post.likes);
     }
      else {
-     const unlike = await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });
-      await unlike.save()
+   await Post.updateOne({_id:postId}, { $pull:{likes:user._id } });
+    
   
-      res.status(200).json(unlike.likes);
+      post = await Post.findById(postId);
+      res.status(200).json(post.likes);
     }
     // if(isliked){
     //   await Post.findByIdAndUpdate(postId, { $pull:{likes:user._id } });

@@ -3,19 +3,21 @@ import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingSpinner from "./LoadingSpinner";
 import toast from "react-hot-toast";
 import { formatPostDate } from "../../utils/date";
+import { useMessageContext } from "../../hooks/useMessage";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   // const queryClient = useQueryClient();
   let queryClient = useQueryClient();
-
+  const [like,setLike] = useState([])
+const {auth} = useMessageContext()
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       try {
@@ -39,7 +41,7 @@ const Post = ({ post }) => {
     },
   });
   const postOwner = post.user;
-  const isLiked = post.likes.includes(authUser._id);
+  const isLiked = post?.likes?.includes(auth?._id);
 
   const handleLikePost = (postId) => {
     
@@ -58,10 +60,10 @@ const Post = ({ post }) => {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
-
+          setLike(data)
         console.log("post", data);
 
-        
+       
         
         return data;
       } catch (error) {
@@ -72,15 +74,23 @@ const Post = ({ post }) => {
     onSuccess: (updatedLikes) => {
     //  await queryClient.invalidateQueries({querykey:["posts"]})
 
-  
-      queryClient.setQueryData(["posts"],(oldData) => {
-        return oldData.map((p) => {
-          if(p._id === post._id) {
-            return {...p,likes:updatedLikes};
-          }
-          return p;
-        });
+    queryClient.setQueryData(["posts"],(oldData) => {
+      return oldData.map((p) => {
+        if(p._id === post?._id) {
+          console.log("likeUnlike",p._id === post?._id)
+          return {...p,likes:updatedLikes};
+        }
+        return p;
       });
+    });
+      // queryClient.setQueryData(["posts"],(oldData) => {
+      //   return oldData.map((p) => {
+      //     if(p._id === post._id) {
+      //       return {...p,likes:updatedLikes}
+      //     }
+      //     return p;
+      //   });
+      // });
       
    
     
@@ -89,7 +99,11 @@ const Post = ({ post }) => {
       toast.error(error.message);
     },
   });
-  const isMyPost = authUser._id == post.user._id;
+
+
+
+
+  const isMyPost = auth?._id == post?.user?._id;
 
   const formattedDate = formatPostDate(post.createdAt);
 
@@ -147,7 +161,7 @@ const Post = ({ post }) => {
       <div key={post._id} className="flex gap-2 items-start p-4 border-b border-gray-700">
         <div className="avatar">
           <Link
-            to={`/profile/${postOwner.username}`}
+            to={`/profile/${postOwner?.username}`}
             className="w-8 rounded-full overflow-hidden"
           >
             <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
